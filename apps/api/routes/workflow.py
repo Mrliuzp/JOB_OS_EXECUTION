@@ -6,7 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from apps.api.dependencies import get_session, get_session_factory, require_local_request
+from apps.api.dependencies import (
+    get_session,
+    get_session_factory,
+    get_settings,
+    require_local_request,
+)
 from jobos.core.errors import NotFoundError
 from jobos.infrastructure.db.models import (
     ApprovalRequestORM,
@@ -16,6 +21,7 @@ from jobos.infrastructure.db.models import (
 )
 from jobos.services.application_service import ApplicationService
 from jobos.workflow.task_queue import TaskQueue
+from jobos.workflow.worker_status import read_worker_status, worker_heartbeat_path
 
 router = APIRouter(
     prefix="/api/v1", tags=["workflow"], dependencies=[Depends(require_local_request)]
@@ -112,10 +118,15 @@ def reject(approval_id: str, session: Session = Depends(get_session)) -> dict[st
 
 
 @router.get("/system/health")
-def system_health(session: Session = Depends(get_session)) -> dict[str, Any]:
-    """检查 API 和数据库状态。"""
+def system_health(session: Session = Depends(get_session)) -> dict[str, str]:
+    """检查 API、数据库和 Worker 心跳状态。"""
     session.execute(select(1))
-    return {"status": "ok", "database": "ok", "worker": "unknown"}
+    settings = get_settings()
+    status = read_worker_status(
+        worker_heartbeat_path(settings.resolved_data_dir()),
+        float(settings.worker.heartbeat_seconds * 3),
+    )
+    return {"status": "ok", "database": "ok", **status.health_payload()}
 
 
 def _orm_dict(item: Any) -> dict[str, Any]:
