@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from html.parser import HTMLParser
 from urllib.parse import urljoin
 
 from jobos.core.errors import ProviderJobExpired, ProviderPageChanged
-from jobos.domain.schemas import JobSearchItem, JobSearchPage, RawJobDetail
+from jobos.domain.schemas import (
+    ConversationPage,
+    ExternalConversation,
+    ExternalMessage,
+    JobSearchItem,
+    JobSearchPage,
+    MessagePage,
+    RawJobDetail,
+)
 
 
 class _NodeParser(HTMLParser):
@@ -71,6 +80,14 @@ def _has_class(node: dict[str, object], class_name: str) -> bool:
     return class_name in classes
 
 
+def _role_text(nodes: list[dict[str, object]], role: str) -> str | None:
+    target = next(
+        (node for node in nodes if _attrs(node).get("data-role") == role),
+        None,
+    )
+    return _text(target) if target else None
+
+
 def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> JobSearchPage:
     """解析职位列表 Fixture 或兼容页面。"""
     parser = _NodeParser()
@@ -87,7 +104,11 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
         job_id = attrs.get("data-job-id")
         descendants = _all_nodes([card])
         link = next(
-            (node for node in descendants if node.get("tag") == "a" and _attrs(node).get("href")),
+            (
+                node
+                for node in descendants
+                if node.get("tag") == "a" and _attrs(node).get("href")
+            ),
             None,
         )
         href = _attrs(link).get("href") if link else None
@@ -96,19 +117,39 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
         if not job_id or job_id in seen:
             continue
         title_node = next(
-            (node for node in descendants if _has_class(node, "job-name") or _attrs(node).get("data-role") == "job-title"),
+            (
+                node
+                for node in descendants
+                if _has_class(node, "job-name")
+                or _attrs(node).get("data-role") == "job-title"
+            ),
             link,
         )
         company_node = next(
-            (node for node in descendants if _has_class(node, "company-name") or _attrs(node).get("data-role") == "company"),
+            (
+                node
+                for node in descendants
+                if _has_class(node, "company-name")
+                or _attrs(node).get("data-role") == "company"
+            ),
             None,
         )
         location_node = next(
-            (node for node in descendants if _has_class(node, "job-area") or _attrs(node).get("data-role") == "location"),
+            (
+                node
+                for node in descendants
+                if _has_class(node, "job-area")
+                or _attrs(node).get("data-role") == "location"
+            ),
             None,
         )
         salary_node = next(
-            (node for node in descendants if _has_class(node, "salary") or _attrs(node).get("data-role") == "salary"),
+            (
+                node
+                for node in descendants
+                if _has_class(node, "salary")
+                or _attrs(node).get("data-role") == "salary"
+            ),
             None,
         )
         title = _text(title_node) if title_node else ""
@@ -143,21 +184,35 @@ def parse_job_detail(html: str, canonical_url: str) -> RawJobDetail:
     def by_role(role: str) -> dict[str, object] | None:
         return next((node for node in nodes if _attrs(node).get("data-role") == role), None)
 
-    title_node = by_role("job-title") or next((n for n in nodes if _has_class(n, "name")), None)
-    company_node = by_role("company") or next((n for n in nodes if _has_class(n, "company-info")), None)
-    description_node = by_role("description") or next((n for n in nodes if _has_class(n, "job-sec-text")), None)
+    title_node = by_role("job-title") or next(
+        (node for node in nodes if _has_class(node, "name")),
+        None,
+    )
+    company_node = by_role("company") or next(
+        (node for node in nodes if _has_class(node, "company-info")),
+        None,
+    )
+    description_node = by_role("description") or next(
+        (node for node in nodes if _has_class(node, "job-sec-text")),
+        None,
+    )
     if not title_node or not company_node or not description_node:
         raise ProviderPageChanged("职位详情页缺少标题、公司或描述")
     root = next((node for node in nodes if _attrs(node).get("data-job-id")), None)
     root_attrs = _attrs(root) if root else {}
-    external_id = str(root_attrs.get("data-job-id") or canonical_url.rstrip("/").split("/")[-1].split(".")[0])
+    external_id = str(
+        root_attrs.get("data-job-id")
+        or canonical_url.rstrip("/").split("/")[-1].split(".")[0]
+    )
     requirements = [
         _text(node)
         for node in nodes
         if _attrs(node).get("data-role") == "requirement" and _text(node)
     ]
     benefits = [
-        _text(node) for node in nodes if _attrs(node).get("data-role") == "benefit" and _text(node)
+        _text(node)
+        for node in nodes
+        if _attrs(node).get("data-role") == "benefit" and _text(node)
     ]
     work_mode = str(root_attrs.get("data-work-mode") or "unknown")
     employment_type = str(root_attrs.get("data-employment-type") or "unknown")
@@ -176,12 +231,8 @@ def parse_job_detail(html: str, canonical_url: str) -> RawJobDetail:
     )
 
 
-def parse_conversations(html: str) -> "ConversationPage":
+def parse_conversations(html: str) -> ConversationPage:
     """解析站内会话列表。"""
-    from datetime import datetime
-
-    from jobos.domain.schemas import ConversationPage, ExternalConversation
-
     parser = _NodeParser()
     parser.feed(html)
     items: list[ExternalConversation] = []
@@ -191,19 +242,14 @@ def parse_conversations(html: str) -> "ConversationPage":
         if not conversation_id:
             continue
         descendants = _all_nodes([node])
-
-        def role_text(role: str) -> str | None:
-            target = next((child for child in descendants if _attrs(child).get("data-role") == role), None)
-            return _text(target) if target else None
-
         unread_raw = attrs.get("data-unread-count") or "0"
         time_raw = attrs.get("data-last-message-at")
         items.append(
             ExternalConversation(
                 external_conversation_id=str(conversation_id),
                 external_job_id=attrs.get("data-job-id"),
-                recruiter_name=role_text("recruiter"),
-                recruiter_company=role_text("company"),
+                recruiter_name=_role_text(descendants, "recruiter"),
+                recruiter_company=_role_text(descendants, "company"),
                 unread_count=int(str(unread_raw)),
                 last_message_at=datetime.fromisoformat(str(time_raw)) if time_raw else None,
             )
@@ -213,12 +259,8 @@ def parse_conversations(html: str) -> "ConversationPage":
     return ConversationPage(items=items)
 
 
-def parse_messages(html: str) -> "MessagePage":
+def parse_messages(html: str) -> MessagePage:
     """解析会话消息列表。"""
-    from datetime import datetime
-
-    from jobos.domain.schemas import ExternalMessage, MessagePage
-
     parser = _NodeParser()
     parser.feed(html)
     items: list[ExternalMessage] = []
