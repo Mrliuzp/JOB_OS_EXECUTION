@@ -1,0 +1,6 @@
+key: conversation.items
+strategies:
+  - type: css
+    value: '[data-role="conversation-item"]'
+validation:
+  minimum_count: 1

@@ -1,0 +1,8 @@
+key: login.account_marker
+strategies:
+  - type: text
+    value: 个人中心
+  - type: css
+    value: '[data-user-logged-in="true"]'
+validation:
+  minimum_count: 1

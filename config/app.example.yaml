@@ -1,5 +1,29 @@
 app:
   name: JobOS-CN
   environment: development
+  data_dir: ~/.jobos
   timezone: Asia/Shanghai
   language: zh-CN
+  automation_level: L1
+
+database:
+  url: sqlite:///~/.jobos/jobos.db
+  echo: false
+  wal: true
+
+worker:
+  concurrency: 2
+  lease_seconds: 300
+  heartbeat_seconds: 30
+
+browser:
+  executable_path: null
+  headless: false
+  action_timeout_ms: 15000
+  page_timeout_ms: 45000
+  screenshot_on_error: true
+
+security:
+  redact_logs: true
+  encrypt_secrets: true
+  local_only: true

@@ -1,1 +1,1 @@
-"""Versioned prompt registry."""
+"""Prompt 版本管理。"""

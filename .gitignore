@@ -1,31 +1,18 @@
-# Environment and secrets
 .env
 .env.*
 !.env.example
-
-# Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.egg-info/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
-coverage.xml
 htmlcov/
 .venv/
 venv/
-dist/
-build/
-
-# Node
 node_modules/
-apps/web/node_modules/
-apps/web/dist/
-apps/web/coverage/
-
-# Runtime data
+dist/
+coverage/
 *.db
 *.sqlite
 *.sqlite3
@@ -34,24 +21,9 @@ logs/
 artifacts/
 browser-profiles/
 chrome-workers/
-apply-workers/
+debug-snapshots/
 *.log
-
-# Personal files
-profile.json
-resume.txt
-resume.pdf
-
-# MCP and local agent configuration
-.mcp*.json
-.claude/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/

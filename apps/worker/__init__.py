@@ -1,1 +1,1 @@
-"""Worker application package."""
+"""后台任务 Worker。"""

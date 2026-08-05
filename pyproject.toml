@@ -1,25 +1,19 @@
 [project]
 name = "jobos-cn"
-version = "0.1.0"
-description = "Local-first AI job search operating system for part-time and remote roles in China"
+version = "0.2.0"
+description = "面向国内兼职与远程岗位的本地优先 AI 求职操作系统"
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11"
 authors = [{name = "Mrliuzp"}]
 keywords = ["job-search", "automation", "ai", "resume", "china", "remote-work"]
-classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
-    "Environment :: Console",
-    "Framework :: FastAPI",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-]
-
 dependencies = [
     "alembic>=1.13,<2",
     "fastapi>=0.116,<1",
     "httpx>=0.28,<1",
+    "jinja2>=3.1,<4",
+    "jsonschema>=4.23,<5",
+    "keyring>=25,<26",
     "playwright>=1.54,<2",
     "pydantic>=2.11,<3",
     "pydantic-settings>=2.10,<3",
@@ -37,10 +31,12 @@ dev = [
     "coverage[toml]>=7.10,<8",
     "mypy>=1.17,<2",
     "pytest>=8.4,<9",
+    "pytest-asyncio>=1.1,<2",
     "pytest-cov>=6.2,<7",
     "ruff>=0.12,<1",
     "types-pyyaml>=6.0,<7",
 ]
+postgres = ["psycopg[binary]>=3.2,<4"]
 
 [project.scripts]
 jobos = "apps.cli.main:app"
@@ -54,9 +50,19 @@ where = ["."]
 include = ["jobos*", "apps*"]
 exclude = ["tests*", "src*"]
 
+[tool.setuptools.package-data]
+"jobos.providers.boss" = ["selectors/*.yaml"]
+"jobos.artifacts" = ["resume_templates/*.j2"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = ["--strict-config", "--strict-markers"]
+asyncio_mode = "auto"
+markers = [
+    "integration: 数据库或多个组件集成测试",
+    "contract: Provider 合同测试",
+    "e2e: 端到端业务流程测试",
+]
 
 [tool.coverage.run]
 branch = true
@@ -65,21 +71,21 @@ omit = [
     "*/__init__.py",
     "*/migrations/*",
     "tests/*",
+    "apps/cli/main.py",
+    "apps/worker/main.py",
+    "jobos/browser/session_manager.py",
+    "jobos/llm/providers.py",
 ]
 
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 70
+fail_under = 75
 
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-extend-exclude = [
-    "src/applypilot",
-    "apps/web",
-    "docs",
-]
+extend-exclude = ["src/applypilot", "apps/web", "docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
@@ -93,4 +99,5 @@ line-ending = "lf"
 python_version = "3.11"
 strict = true
 warn_unused_configs = true
-exclude = ["^src/applypilot/"]
+plugins = ["pydantic.mypy"]
+exclude = ["^src/applypilot/", "^jobos/infrastructure/migrations/"]

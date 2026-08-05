@@ -1,1 +1,1 @@
-"""Core configuration, errors, logging and security boundaries."""
+"""核心基础设施。"""

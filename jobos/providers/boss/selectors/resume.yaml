@@ -1,0 +1,8 @@
+key: resume.upload
+strategies:
+  - type: label
+    value: 上传简历
+  - type: css
+    value: input[type="file"]
+validation:
+  minimum_count: 1

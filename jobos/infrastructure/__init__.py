@@ -1,1 +1,1 @@
-"""Persistence and external infrastructure adapters."""
+"""基础设施实现。"""

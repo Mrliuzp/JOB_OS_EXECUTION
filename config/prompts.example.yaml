@@ -1,2 +1,3 @@
 prompts:
   directory: jobos/prompts
+  version: 1

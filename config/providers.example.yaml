@@ -1,3 +1,13 @@
 providers:
   boss:
     enabled: false
+    account: primary
+    max_concurrency: 1
+    daily_action_limit: 30
+    minimum_action_interval_seconds: 20
+  zhaopin:
+    enabled: false
+  liepin:
+    enabled: false
+  lagou:
+    enabled: false
