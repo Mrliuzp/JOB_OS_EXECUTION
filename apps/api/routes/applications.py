@@ -79,9 +79,7 @@ def create_application(
 
 
 @router.get("/{application_id}")
-def get_application(
-    application_id: str, session: Session = Depends(get_session)
-) -> dict[str, Any]:
+def get_application(application_id: str, session: Session = Depends(get_session)) -> dict[str, Any]:
     """获取申请。"""
     application = session.get(ApplicationORM, application_id)
     if application is None:
@@ -114,7 +112,9 @@ def approve_application(
     )
     if approval_id is None:
         raise HTTPException(status_code=404, detail="没有待处理审批")
-    approval = ApplicationService(session).resolve_approval(approval_id, payload.approved, note=payload.note)
+    approval = ApplicationService(session).resolve_approval(
+        approval_id, payload.approved, note=payload.note
+    )
     return {"approval_id": approval.id, "status": approval.status}
 
 
@@ -130,7 +130,11 @@ async def submit_application(
     if application is None:
         raise HTTPException(status_code=404, detail="申请不存在")
     job = session.get(JobORM, application.job_id)
-    account = session.get(PlatformAccountORM, application.platform_account_id) if application.platform_account_id else None
+    account = (
+        session.get(PlatformAccountORM, application.platform_account_id)
+        if application.platform_account_id
+        else None
+    )
     if job is None or account is None:
         raise HTTPException(status_code=409, detail="申请缺少职位或平台账号")
     try:

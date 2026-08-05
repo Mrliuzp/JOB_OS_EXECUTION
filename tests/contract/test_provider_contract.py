@@ -20,13 +20,18 @@ async def test_mock_provider_fulfills_contract() -> None:
     assert (await provider.check_login(account)).logged_in
     page = await provider.discover_jobs(account, JobSearchQuery(keywords=["Python"]))
     detail = await provider.fetch_job_detail(
-        account, ExternalJobRef(external_job_id=page.items[0].external_job_id, canonical_url=page.items[0].canonical_url)
+        account,
+        ExternalJobRef(
+            external_job_id=page.items[0].external_job_id, canonical_url=page.items[0].canonical_url
+        ),
     )
     assert detail.title
     contact = await provider.initiate_contact(
         account,
         ContactRequest(
-            job=ExternalJobRef(external_job_id=detail.external_job_id, canonical_url=detail.canonical_url),
+            job=ExternalJobRef(
+                external_job_id=detail.external_job_id, canonical_url=detail.canonical_url
+            ),
             message="您好",
             idempotency_key="contact-1",
             dry_run=True,
@@ -34,7 +39,9 @@ async def test_mock_provider_fulfills_contract() -> None:
     )
     assert contact.dry_run
     conversations = await provider.list_conversations(account)
-    messages = await provider.list_messages(account, conversations.items[0].external_conversation_id)
+    messages = await provider.list_messages(
+        account, conversations.items[0].external_conversation_id
+    )
     assert messages.items
     sent = await provider.send_message(
         account,

@@ -21,7 +21,9 @@ from jobos.providers.registry import ProviderRegistry
 from jobos.rules.engine import RuleEngine
 from jobos.services.communication_service import CommunicationService
 
-router = APIRouter(prefix="/api/v1", tags=["conversations"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1", tags=["conversations"], dependencies=[Depends(require_local_request)]
+)
 
 
 class SyncConversationRequest(BaseModel):
@@ -51,7 +53,9 @@ def _service(session: Session) -> CommunicationService:
 @router.get("/conversations")
 def list_conversations(session: Session = Depends(get_session)) -> list[dict[str, Any]]:
     """列出会话。"""
-    items = session.scalars(select(ConversationORM).order_by(ConversationORM.updated_at.desc())).all()
+    items = session.scalars(
+        select(ConversationORM).order_by(ConversationORM.updated_at.desc())
+    ).all()
     return [_orm_dict(item) for item in items]
 
 
@@ -75,7 +79,9 @@ async def sync_conversations(
 
 
 @router.get("/conversations/{conversation_id}/messages")
-def list_messages(conversation_id: str, session: Session = Depends(get_session)) -> list[dict[str, Any]]:
+def list_messages(
+    conversation_id: str, session: Session = Depends(get_session)
+) -> list[dict[str, Any]]:
     """列出会话消息。"""
     items = session.scalars(
         select(MessageORM).where(MessageORM.conversation_id == conversation_id)

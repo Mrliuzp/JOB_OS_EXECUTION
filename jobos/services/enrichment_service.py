@@ -20,9 +20,7 @@ class EnrichmentService:
         """补全单个职位。"""
         detail = await provider.fetch_job_detail(
             account,
-            ExternalJobRef(
-                external_job_id=job.external_job_id, canonical_url=job.canonical_url
-            ),
+            ExternalJobRef(external_job_id=job.external_job_id, canonical_url=job.canonical_url),
         )
         updated, _ = JobService(self.session).import_detail(provider.name, detail)
         return updated

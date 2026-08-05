@@ -80,9 +80,7 @@ class ScoringService:
             if require_llm:
                 if self.llm is None:
                     raise LLMConfigurationError("职位评分要求 LLM，但尚未配置模型网关")
-                result = await self._llm_score(
-                    job, evidence, provider_names or [], model, result
-                )
+                result = await self._llm_score(job, evidence, provider_names or [], model, result)
         existing = self.session.scalar(
             select(JobScoreORM).where(
                 JobScoreORM.job_id == job.id, JobScoreORM.profile_id == profile_id
@@ -116,13 +114,28 @@ class ScoringService:
         ratio = len(matched) / max(len(requirements), 1)
         technical = round(30 * ratio, 2)
         experience = min(20.0, round(len(evidence.facts) * 2.5, 2))
-        employment = 15.0 if job.employment_type in {"part_time", "contract", "freelance", "temporary"} else 5.0
+        employment = (
+            15.0
+            if job.employment_type in {"part_time", "contract", "freelance", "temporary"}
+            else 5.0
+        )
         work_mode = 10.0 if job.work_mode in {"remote", "hybrid"} else 3.0
-        availability = 10.0 if any(item.fact_type == "availability" for item in evidence.facts) else 5.0
+        availability = (
+            10.0 if any(item.fact_type == "availability" for item in evidence.facts) else 5.0
+        )
         compensation = 5.0 if job.salary_min is not None or job.salary_max is not None else 3.0
         credibility = 5.0 if len(job.description_normalized) >= 50 else 2.0
         risk = 5.0
-        total = technical + experience + employment + work_mode + availability + compensation + credibility + risk
+        total = (
+            technical
+            + experience
+            + employment
+            + work_mode
+            + availability
+            + compensation
+            + credibility
+            + risk
+        )
         if total < 55:
             decision = "reject"
         elif total < 72:

@@ -7,7 +7,6 @@ from jobos.core.enums import AutomationLevel
 from jobos.core.errors import ApprovalRequiredError
 from jobos.infrastructure.db.models import (
     CandidateProfileORM,
-    JobORM,
     PlatformAccountORM,
     ResumeVersionORM,
 )

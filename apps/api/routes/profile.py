@@ -10,7 +10,9 @@ from jobos.core.errors import NotFoundError
 from jobos.domain.schemas import CandidateFactInput, CandidateProfileInput
 from jobos.services.profile_service import ProfileService, profile_to_dict
 
-router = APIRouter(prefix="/api/v1/profile", tags=["profile"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1/profile", tags=["profile"], dependencies=[Depends(require_local_request)]
+)
 
 
 @router.get("")

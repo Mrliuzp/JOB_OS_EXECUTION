@@ -20,7 +20,9 @@ target_metadata = Base.metadata
 def run_migrations_offline() -> None:
     """离线生成 SQL。"""
     url = normalize_database_url(config.get_main_option("sqlalchemy.url"))
-    context.configure(url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True)
+    context.configure(
+        url=url, target_metadata=target_metadata, literal_binds=True, compare_type=True
+    )
     with context.begin_transaction():
         context.run_migrations()
 

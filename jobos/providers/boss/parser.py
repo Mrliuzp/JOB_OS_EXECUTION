@@ -104,11 +104,7 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
         job_id = attrs.get("data-job-id")
         descendants = _all_nodes([card])
         link = next(
-            (
-                node
-                for node in descendants
-                if node.get("tag") == "a" and _attrs(node).get("href")
-            ),
+            (node for node in descendants if node.get("tag") == "a" and _attrs(node).get("href")),
             None,
         )
         href = _attrs(link).get("href") if link else None
@@ -120,8 +116,7 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
             (
                 node
                 for node in descendants
-                if _has_class(node, "job-name")
-                or _attrs(node).get("data-role") == "job-title"
+                if _has_class(node, "job-name") or _attrs(node).get("data-role") == "job-title"
             ),
             link,
         )
@@ -129,8 +124,7 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
             (
                 node
                 for node in descendants
-                if _has_class(node, "company-name")
-                or _attrs(node).get("data-role") == "company"
+                if _has_class(node, "company-name") or _attrs(node).get("data-role") == "company"
             ),
             None,
         )
@@ -138,8 +132,7 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
             (
                 node
                 for node in descendants
-                if _has_class(node, "job-area")
-                or _attrs(node).get("data-role") == "location"
+                if _has_class(node, "job-area") or _attrs(node).get("data-role") == "location"
             ),
             None,
         )
@@ -147,8 +140,7 @@ def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> Jo
             (
                 node
                 for node in descendants
-                if _has_class(node, "salary")
-                or _attrs(node).get("data-role") == "salary"
+                if _has_class(node, "salary") or _attrs(node).get("data-role") == "salary"
             ),
             None,
         )
@@ -201,8 +193,7 @@ def parse_job_detail(html: str, canonical_url: str) -> RawJobDetail:
     root = next((node for node in nodes if _attrs(node).get("data-job-id")), None)
     root_attrs = _attrs(root) if root else {}
     external_id = str(
-        root_attrs.get("data-job-id")
-        or canonical_url.rstrip("/").split("/")[-1].split(".")[0]
+        root_attrs.get("data-job-id") or canonical_url.rstrip("/").split("/")[-1].split(".")[0]
     )
     requirements = [
         _text(node)
@@ -210,9 +201,7 @@ def parse_job_detail(html: str, canonical_url: str) -> RawJobDetail:
         if _attrs(node).get("data-role") == "requirement" and _text(node)
     ]
     benefits = [
-        _text(node)
-        for node in nodes
-        if _attrs(node).get("data-role") == "benefit" and _text(node)
+        _text(node) for node in nodes if _attrs(node).get("data-role") == "benefit" and _text(node)
     ]
     work_mode = str(root_attrs.get("data-work-mode") or "unknown")
     employment_type = str(root_attrs.get("data-employment-type") or "unknown")

@@ -27,7 +27,8 @@ async def test_boss_login_search_and_detail() -> None:
     page = await provider.discover_jobs(account, JobSearchQuery(keywords=["Vue"]))
     assert len(page.items) == 2
     detail = await provider.fetch_job_detail(
-        account, ExternalJobRef(external_job_id="boss-001", canonical_url=page.items[0].canonical_url)
+        account,
+        ExternalJobRef(external_job_id="boss-001", canonical_url=page.items[0].canonical_url),
     )
     assert detail.work_mode == "remote"
     assert detail.employment_type == "part_time"

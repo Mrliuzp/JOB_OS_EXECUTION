@@ -41,9 +41,7 @@ class TaskQueue:
         """创建任务；同一幂等键只保留一个任务。"""
         with self.factory() as session, session.begin():
             existing = session.scalar(
-                select(WorkflowTaskORM).where(
-                    WorkflowTaskORM.idempotency_key == idempotency_key
-                )
+                select(WorkflowTaskORM).where(WorkflowTaskORM.idempotency_key == idempotency_key)
             )
             if existing is not None:
                 return existing
@@ -164,9 +162,7 @@ class TaskQueue:
             result = session.execute(
                 update(WorkflowTaskORM)
                 .where(
-                    WorkflowTaskORM.status.in_(
-                        [TaskStatus.LEASED.value, TaskStatus.RUNNING.value]
-                    ),
+                    WorkflowTaskORM.status.in_([TaskStatus.LEASED.value, TaskStatus.RUNNING.value]),
                     WorkflowTaskORM.lease_expires_at.is_not(None),
                     WorkflowTaskORM.lease_expires_at <= current,
                 )

@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from jobos.artifacts.renderer import ResumeRenderer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies import get_session, get_settings, require_local_request
-from jobos.artifacts.renderer import ResumeRenderer
 from jobos.core.config import JobOSSettings
 from jobos.infrastructure.db.models import (
     CandidateProfileORM,
@@ -21,7 +21,9 @@ from jobos.rules.engine import RuleEngine
 from jobos.services.resume_service import ResumeService
 from jobos.services.scoring_service import ScoringService
 
-router = APIRouter(prefix="/api/v1", tags=["resumes"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1", tags=["resumes"], dependencies=[Depends(require_local_request)]
+)
 
 
 @router.post("/jobs/{job_id}/score")
@@ -42,16 +44,14 @@ async def score_job(
         job.description_normalized,
         [str(item) for item in job.requirements_json],
     )
-    score = await ScoringService(
-        session, RuleEngine(settings.policies.model_dump())
-    ).score(job, profile.id, evidence)
+    score = await ScoringService(session, RuleEngine(settings.policies.model_dump())).score(
+        job, profile.id, evidence
+    )
     return _orm_dict(score)
 
 
 @router.post("/jobs/{job_id}/generate-resume")
-def generate_resume(
-    job_id: str, session: Session = Depends(get_session)
-) -> dict[str, Any]:
+def generate_resume(job_id: str, session: Session = Depends(get_session)) -> dict[str, Any]:
     """生成并校验职位定制简历。"""
     job = session.get(JobORM, job_id)
     profile = session.scalar(select(CandidateProfileORM).limit(1))

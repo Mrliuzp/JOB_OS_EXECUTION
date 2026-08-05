@@ -3,7 +3,6 @@
 from jobos.rules.engine import RuleEngine
 from jobos.rules.schemas import RuleContext
 
-
 POLICIES = {
     "job_policy": {
         "accepted_employment_types": ["part_time"],
@@ -39,6 +38,8 @@ def test_hard_reject_cannot_be_overridden_by_score() -> None:
 
 def test_offer_message_is_always_manual() -> None:
     result = RuleEngine(POLICIES).evaluate_message(
-        RuleContext(title="", company_name="", description="", message_type="offer", risk_level="critical")
+        RuleContext(
+            title="", company_name="", description="", message_type="offer", risk_level="critical"
+        )
     )
     assert result.action == "manual_required"

@@ -32,7 +32,9 @@ class MockProvider:
         self.sent_keys: set[str] = set()
 
     async def check_login(self, account: PlatformAccountORM) -> LoginStatus:
-        return LoginStatus(logged_in=account.status == "logged_in", account_name=account.display_name)
+        return LoginStatus(
+            logged_in=account.status == "logged_in", account_name=account.display_name
+        )
 
     async def discover_jobs(
         self, account: PlatformAccountORM, query: JobSearchQuery, cursor: str | None = None

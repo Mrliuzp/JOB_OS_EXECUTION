@@ -5,7 +5,11 @@ from pathlib import Path
 from sqlalchemy import create_engine, inspect
 
 from jobos.core.config.settings import JobOSSettings
-from jobos.infrastructure.db.session import create_database_engine, init_database, normalize_database_url
+from jobos.infrastructure.db.session import (
+    create_database_engine,
+    init_database,
+    normalize_database_url,
+)
 
 
 def test_database_initializes_all_core_tables(tmp_path: Path) -> None:
@@ -15,7 +19,13 @@ def test_database_initializes_all_core_tables(tmp_path: Path) -> None:
     engine = create_database_engine(settings)
     init_database(engine)
     tables = set(inspect(engine).get_table_names())
-    assert {"candidate_profiles", "candidate_facts", "jobs", "workflow_tasks", "audit_events"} <= tables
+    assert {
+        "candidate_profiles",
+        "candidate_facts",
+        "jobs",
+        "workflow_tasks",
+        "audit_events",
+    } <= tables
     engine.dispose()
 
 

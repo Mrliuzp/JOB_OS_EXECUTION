@@ -6,7 +6,17 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -55,7 +65,9 @@ class CandidateFactORM(TimestampMixin, Base):
     __tablename__ = "candidate_facts"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
-    profile_id: Mapped[str] = mapped_column(ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True)
+    profile_id: Mapped[str] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True
+    )
     fact_type: Mapped[str] = mapped_column(String(40), index=True)
     statement: Mapped[str] = mapped_column(Text)
     source_type: Mapped[str] = mapped_column(String(40), default="manual")
@@ -75,8 +87,12 @@ class ResumeVersionORM(Base):
     __tablename__ = "resume_versions"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
-    profile_id: Mapped[str] = mapped_column(ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True)
-    job_id: Mapped[str | None] = mapped_column(ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True, index=True)
+    profile_id: Mapped[str] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True
+    )
+    job_id: Mapped[str | None] = mapped_column(
+        ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     version_type: Mapped[str] = mapped_column(String(20), default="tailored")
     language: Mapped[str] = mapped_column(String(16), default="zh-CN")
     title: Mapped[str] = mapped_column(String(255))
@@ -101,7 +117,9 @@ class PlatformAccountORM(TimestampMixin, Base):
     display_name: Mapped[str] = mapped_column(String(100))
     browser_profile_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(30), default="unknown")
-    last_login_check_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_check_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     rate_limit_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
     settings_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
@@ -151,7 +169,9 @@ class JobScoreORM(Base):
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     job_id: Mapped[str] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), index=True)
-    profile_id: Mapped[str] = mapped_column(ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True)
+    profile_id: Mapped[str] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True
+    )
     total_score: Mapped[float] = mapped_column(Float)
     technical_score: Mapped[float] = mapped_column(Float, default=0)
     experience_score: Mapped[float] = mapped_column(Float, default=0)
@@ -180,9 +200,15 @@ class ApplicationORM(TimestampMixin, Base):
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     job_id: Mapped[str] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), index=True)
-    profile_id: Mapped[str] = mapped_column(ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True)
-    platform_account_id: Mapped[str | None] = mapped_column(ForeignKey("platform_accounts.id", ondelete="SET NULL"), nullable=True)
-    resume_version_id: Mapped[str | None] = mapped_column(ForeignKey("resume_versions.id", ondelete="SET NULL"), nullable=True)
+    profile_id: Mapped[str] = mapped_column(
+        ForeignKey("candidate_profiles.id", ondelete="CASCADE"), index=True
+    )
+    platform_account_id: Mapped[str | None] = mapped_column(
+        ForeignKey("platform_accounts.id", ondelete="SET NULL"), nullable=True
+    )
+    resume_version_id: Mapped[str | None] = mapped_column(
+        ForeignKey("resume_versions.id", ondelete="SET NULL"), nullable=True
+    )
     status: Mapped[str] = mapped_column(String(30), default="planned", index=True)
     autonomy_level: Mapped[str] = mapped_column(String(8), default="L1")
     intro_message: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -198,13 +224,19 @@ class ConversationORM(TimestampMixin, Base):
     """平台会话。"""
 
     __tablename__ = "conversations"
-    __table_args__ = (UniqueConstraint("provider", "external_conversation_id", name="uq_conversation_external"),)
+    __table_args__ = (
+        UniqueConstraint("provider", "external_conversation_id", name="uq_conversation_external"),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     provider: Mapped[str] = mapped_column(String(40), index=True)
     external_conversation_id: Mapped[str] = mapped_column(String(255))
-    job_id: Mapped[str | None] = mapped_column(ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True)
-    application_id: Mapped[str | None] = mapped_column(ForeignKey("applications.id", ondelete="SET NULL"), nullable=True)
+    job_id: Mapped[str | None] = mapped_column(
+        ForeignKey("jobs.id", ondelete="SET NULL"), nullable=True
+    )
+    application_id: Mapped[str | None] = mapped_column(
+        ForeignKey("applications.id", ondelete="SET NULL"), nullable=True
+    )
     recruiter_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     recruiter_company: Mapped[str | None] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(String(30), default="active")
@@ -216,10 +248,14 @@ class MessageORM(Base):
     """会话消息。"""
 
     __tablename__ = "messages"
-    __table_args__ = (UniqueConstraint("conversation_id", "external_message_id", name="uq_message_external"),)
+    __table_args__ = (
+        UniqueConstraint("conversation_id", "external_message_id", name="uq_message_external"),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
-    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"), index=True)
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), index=True
+    )
     external_message_id: Mapped[str] = mapped_column(String(255))
     direction: Mapped[str] = mapped_column(String(20))
     sender_type: Mapped[str] = mapped_column(String(30))
@@ -264,9 +300,13 @@ class WorkflowTaskORM(TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(30), default="pending", index=True)
     priority: Mapped[int] = mapped_column(Integer, default=0, index=True)
     scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
-    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, index=True)
+    available_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, index=True
+    )
     lease_owner: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
-    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     attempt_count: Mapped[int] = mapped_column(Integer, default=0)
     max_attempts: Mapped[int] = mapped_column(Integer, default=3)
     input_json: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)

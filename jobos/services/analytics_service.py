@@ -7,7 +7,13 @@ from dataclasses import asdict, dataclass
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
-from jobos.infrastructure.db.models import ApplicationORM, ConversationORM, JobORM, MessageORM, ResumeVersionORM
+from jobos.infrastructure.db.models import (
+    ApplicationORM,
+    ConversationORM,
+    JobORM,
+    MessageORM,
+    ResumeVersionORM,
+)
 
 
 @dataclass(frozen=True)
@@ -50,7 +56,9 @@ class AnalyticsService:
         submitted = int(
             self.session.scalar(
                 select(func.count(ApplicationORM.id)).where(
-                    ApplicationORM.status.in_(["submitted", "viewed", "interviewing", "offer", "accepted"])
+                    ApplicationORM.status.in_(
+                        ["submitted", "viewed", "interviewing", "offer", "accepted"]
+                    )
                 )
             )
             or 0
@@ -109,7 +117,12 @@ class AnalyticsService:
             .group_by(ResumeVersionORM.id, ResumeVersionORM.title)
         ).all()
         return [
-            {"resume_id": row[0], "title": row[1], "applications": int(row[2] or 0), "interviews": int(row[3] or 0)}
+            {
+                "resume_id": row[0],
+                "title": row[1],
+                "applications": int(row[2] or 0),
+                "interviews": int(row[3] or 0),
+            }
             for row in rows
         ]
 

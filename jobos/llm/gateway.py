@@ -66,7 +66,9 @@ class LLMGateway:
         if block:
             candidate = block.group(1).strip()
         else:
-            start_positions = [pos for pos in (candidate.find("{"), candidate.find("[")) if pos >= 0]
+            start_positions = [
+                pos for pos in (candidate.find("{"), candidate.find("[")) if pos >= 0
+            ]
             if start_positions:
                 candidate = candidate[min(start_positions) :]
         try:

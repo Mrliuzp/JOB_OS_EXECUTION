@@ -33,7 +33,9 @@ POLICIES = {
 }
 
 
-async def test_scoring_uses_evidence_ids_and_requires_model_when_requested(session: Session) -> None:
+async def test_scoring_uses_evidence_ids_and_requires_model_when_requested(
+    session: Session,
+) -> None:
     profile_service = ProfileService(session)
     profile = profile_service.upsert_profile(
         CandidateProfileInput(name="李先生", summary="软件开发工程师")
@@ -54,7 +56,11 @@ async def test_scoring_uses_evidence_ids_and_requires_model_when_requested(sessi
         "Python 远程兼职开发", "示例科技", "远程兼职，要求 Python、FastAPI 和 SQL"
     )
     evidence = build_evidence_pack(
-        LocalMemoryStore(session), profile.id, job.id, job.description_normalized, list(job.requirements_json)
+        LocalMemoryStore(session),
+        profile.id,
+        job.id,
+        job.description_normalized,
+        list(job.requirements_json),
     )
     score = await ScoringService(session, RuleEngine(POLICIES)).score(job, profile.id, evidence)
     assert fact.id in score.evidence_ids_json
@@ -70,7 +76,9 @@ async def test_scoring_uses_evidence_ids_and_requires_model_when_requested(sessi
 
 def test_resume_validates_fabrication_and_allows_valid_document(session: Session) -> None:
     profile_service = ProfileService(session)
-    profile = profile_service.upsert_profile(CandidateProfileInput(name="李先生", summary="真实摘要"))
+    profile = profile_service.upsert_profile(
+        CandidateProfileInput(name="李先生", summary="真实摘要")
+    )
     fact = profile_service.add_fact(
         profile.id,
         CandidateFactInput(
@@ -84,9 +92,7 @@ def test_resume_validates_fabrication_and_allows_valid_document(session: Session
             },
         ),
     )
-    job, _ = JobService(session).import_text(
-        "Python 兼职", "客户公司", "远程兼职，要求 Python"
-    )
+    job, _ = JobService(session).import_text("Python 兼职", "客户公司", "远程兼职，要求 Python")
     evidence = EvidencePack(
         job_id=job.id,
         facts=LocalMemoryStore(session).search(profile.id, "Python", for_chat=False),

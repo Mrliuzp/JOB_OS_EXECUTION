@@ -41,23 +41,29 @@ async def test_manual_jd_to_approval_flow(session: Session) -> None:
         "远程兼职，要求 Python、FastAPI、Vue 3 和 TypeScript",
     )
     evidence = build_evidence_pack(
-        LocalMemoryStore(session), profile.id, job.id, job.description_normalized, list(job.requirements_json)
+        LocalMemoryStore(session),
+        profile.id,
+        job.id,
+        job.description_normalized,
+        list(job.requirements_json),
     )
     rules = RuleEngine(
         {
             "job_policy": {
                 "accepted_employment_types": ["part_time"],
                 "accepted_work_modes": ["remote"],
-                "score_thresholds": {"reject_below": 55, "review_below": 72, "auto_contact_above": 82},
+                "score_thresholds": {
+                    "reject_below": 55,
+                    "review_below": 72,
+                    "auto_contact_above": 82,
+                },
             },
             "automation": {},
         }
     )
     score = await ScoringService(session, rules).score(job, profile.id, evidence)
     resume = ResumeService(session).generate(profile, job, evidence)
-    application = ApplicationService(session).create(
-        job.id, profile.id, None, AutomationLevel.L1
-    )
+    application = ApplicationService(session).create(job.id, profile.id, None, AutomationLevel.L1)
     approval = ApplicationService(session).prepare_materials(
         application.id, resume.id, f"您好，我与职位的匹配分为 {score.total_score}。"
     )

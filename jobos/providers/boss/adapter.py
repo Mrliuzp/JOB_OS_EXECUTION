@@ -67,8 +67,7 @@ class BossProvider:
         if risk.detected:
             return LoginStatus(logged_in=False, requires_manual_action=True)
         logged_in = any(
-            marker in html
-            for marker in ('data-user-logged-in="true"', "退出登录", "个人中心")
+            marker in html for marker in ('data-user-logged-in="true"', "退出登录", "个人中心")
         )
         if not logged_in:
             raise ProviderLoginRequired("BOSS 账号需要在独立 Chrome Profile 中手动登录")

@@ -21,8 +21,8 @@ from jobos.providers.lagou import LagouProvider
 from jobos.providers.liepin import LiepinProvider
 from jobos.providers.manual import ManualProvider
 from jobos.providers.mock import MockProvider
-from jobos.providers.zhaopin import ZhaopinProvider
 from jobos.providers.registry import ProviderRegistry
+from jobos.providers.zhaopin import ZhaopinProvider
 
 
 @lru_cache(maxsize=1)
@@ -77,7 +77,9 @@ def get_browser_session_manager() -> BrowserSessionManager:
     executable = detect_chrome_path(settings.browser.executable_path)
     if executable is None:
         raise ConfigurationError("未找到 Chrome，请安装 Chrome 或设置 CHROME_PATH")
-    profile_root = settings.browser.profile_root or (settings.resolved_data_dir() / "browser-profiles")
+    profile_root = settings.browser.profile_root or (
+        settings.resolved_data_dir() / "browser-profiles"
+    )
     return BrowserSessionManager(
         executable, BrowserProfileManager(profile_root), headless=settings.browser.headless
     )

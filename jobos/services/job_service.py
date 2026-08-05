@@ -126,7 +126,13 @@ def detect_work_mode(text: str) -> str:
 
 def detect_employment_type(text: str) -> str:
     """识别职位合作类型。"""
-    mapping = (("兼职", "part_time"), ("外包", "contract"), ("自由职业", "freelance"), ("实习", "internship"), ("全职", "full_time"))
+    mapping = (
+        ("兼职", "part_time"),
+        ("外包", "contract"),
+        ("自由职业", "freelance"),
+        ("实习", "internship"),
+        ("全职", "full_time"),
+    )
     for marker, value in mapping:
         if marker in text:
             return value
@@ -138,5 +144,11 @@ def canonicalize_url(url: str) -> str:
     if url.startswith("manual://"):
         return url
     split = urlsplit(url)
-    allowed = [(key, value) for key, value in parse_qsl(split.query) if not key.lower().startswith(("utm_", "spm", "from"))]
-    return urlunsplit((split.scheme.lower(), split.netloc.lower(), split.path.rstrip("/"), urlencode(allowed), ""))
+    allowed = [
+        (key, value)
+        for key, value in parse_qsl(split.query)
+        if not key.lower().startswith(("utm_", "spm", "from"))
+    ]
+    return urlunsplit(
+        (split.scheme.lower(), split.netloc.lower(), split.path.rstrip("/"), urlencode(allowed), "")
+    )

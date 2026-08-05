@@ -17,13 +17,17 @@ from jobos.infrastructure.db.models import (
 from jobos.services.application_service import ApplicationService
 from jobos.workflow.task_queue import TaskQueue
 
-router = APIRouter(prefix="/api/v1", tags=["workflow"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1", tags=["workflow"], dependencies=[Depends(require_local_request)]
+)
 
 
 @router.get("/tasks")
 def list_tasks(session: Session = Depends(get_session)) -> list[dict[str, Any]]:
     """列出任务。"""
-    items = session.scalars(select(WorkflowTaskORM).order_by(WorkflowTaskORM.created_at.desc())).all()
+    items = session.scalars(
+        select(WorkflowTaskORM).order_by(WorkflowTaskORM.created_at.desc())
+    ).all()
     return [_orm_dict(item) for item in items]
 
 
@@ -59,7 +63,9 @@ def list_audit_events(session: Session = Depends(get_session)) -> list[dict[str,
 
 
 @router.get("/approvals")
-def list_approvals(status: str = "pending", session: Session = Depends(get_session)) -> list[dict[str, Any]]:
+def list_approvals(
+    status: str = "pending", session: Session = Depends(get_session)
+) -> list[dict[str, Any]]:
     """列出审批请求。"""
     items = session.scalars(
         select(ApprovalRequestORM).where(ApprovalRequestORM.status == status)

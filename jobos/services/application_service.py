@@ -43,9 +43,7 @@ class ApplicationService:
         )
         if existing is not None:
             return existing
-        key = build_idempotency_key(
-            "application", {"job_id": job_id, "profile_id": profile_id}
-        )
+        key = build_idempotency_key("application", {"job_id": job_id, "profile_id": profile_id})
         application = ApplicationORM(
             job_id=job_id,
             profile_id=profile_id,
@@ -58,7 +56,11 @@ class ApplicationService:
         return application
 
     def prepare_materials(
-        self, application_id: str, resume_version_id: str, intro_message: str, high_risk: bool = False
+        self,
+        application_id: str,
+        resume_version_id: str,
+        intro_message: str,
+        high_risk: bool = False,
     ) -> ApprovalRequestORM | None:
         """关联材料，并按自动化等级创建审批。"""
         application = self._get(application_id)
@@ -68,7 +70,9 @@ class ApplicationService:
             application.status, ApplicationStatus.MATERIALS_READY.value
         ).value
         level = AutomationLevel(application.autonomy_level)
-        requires_approval = level in {AutomationLevel.L0, AutomationLevel.L1, AutomationLevel.L2} or high_risk
+        requires_approval = (
+            level in {AutomationLevel.L0, AutomationLevel.L1, AutomationLevel.L2} or high_risk
+        )
         if not requires_approval:
             application.status = transition_application(
                 application.status, ApplicationStatus.APPROVED.value
@@ -187,4 +191,6 @@ class ApplicationService:
 
 def application_to_dict(application: ApplicationORM) -> dict[str, Any]:
     """序列化申请。"""
-    return {column.name: getattr(application, column.name) for column in application.__table__.columns}
+    return {
+        column.name: getattr(application, column.name) for column in application.__table__.columns
+    }

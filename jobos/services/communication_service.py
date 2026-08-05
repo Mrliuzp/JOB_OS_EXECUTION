@@ -35,9 +35,7 @@ class CommunicationService:
         self.session = session
         self.rules = rules
 
-    async def sync(
-        self, provider: ProviderAdapter, account: PlatformAccountORM
-    ) -> tuple[int, int]:
+    async def sync(self, provider: ProviderAdapter, account: PlatformAccountORM) -> tuple[int, int]:
         """同步会话和消息，按外部 ID 去重。"""
         conversations = await provider.list_conversations(account)
         conversation_count = 0
@@ -46,8 +44,7 @@ class CommunicationService:
             conversation = self.session.scalar(
                 select(ConversationORM).where(
                     ConversationORM.provider == provider.name,
-                    ConversationORM.external_conversation_id
-                    == external.external_conversation_id,
+                    ConversationORM.external_conversation_id == external.external_conversation_id,
                 )
             )
             if conversation is None:
@@ -71,15 +68,12 @@ class CommunicationService:
             conversation.recruiter_company = external.recruiter_company
             conversation.unread_count = external.unread_count
             conversation.last_message_at = external.last_message_at
-            page = await provider.list_messages(
-                account, external.external_conversation_id
-            )
+            page = await provider.list_messages(account, external.external_conversation_id)
             for external_message in page.items:
                 existing = self.session.scalar(
                     select(MessageORM.id).where(
                         MessageORM.conversation_id == conversation.id,
-                        MessageORM.external_message_id
-                        == external_message.external_message_id,
+                        MessageORM.external_message_id == external_message.external_message_id,
                     )
                 )
                 if existing is not None:
@@ -109,12 +103,37 @@ class CommunicationService:
         mapping: list[tuple[tuple[str, ...], MessageType, RiskLevel, list[str]]] = [
             (("offer", "录用", "入职通知"), MessageType.OFFER, RiskLevel.CRITICAL, []),
             (("合同", "签约"), MessageType.CONTRACT, RiskLevel.CRITICAL, []),
-            (("薪资", "薪酬", "报价", "时薪"), MessageType.SALARY, RiskLevel.HIGH, ["compensation"]),
-            (("面试", "几点", "时间方便"), MessageType.INTERVIEW_SCHEDULE, RiskLevel.HIGH, ["availability"]),
-            (("身份证", "银行卡", "住址"), MessageType.PERSONAL_INFORMATION, RiskLevel.CRITICAL, []),
-            (("每周", "投入时间", "什么时候开始", "可以远程"), MessageType.AVAILABILITY, RiskLevel.LOW, ["availability"]),
+            (
+                ("薪资", "薪酬", "报价", "时薪"),
+                MessageType.SALARY,
+                RiskLevel.HIGH,
+                ["compensation"],
+            ),
+            (
+                ("面试", "几点", "时间方便"),
+                MessageType.INTERVIEW_SCHEDULE,
+                RiskLevel.HIGH,
+                ["availability"],
+            ),
+            (
+                ("身份证", "银行卡", "住址"),
+                MessageType.PERSONAL_INFORMATION,
+                RiskLevel.CRITICAL,
+                [],
+            ),
+            (
+                ("每周", "投入时间", "什么时候开始", "可以远程"),
+                MessageType.AVAILABILITY,
+                RiskLevel.LOW,
+                ["availability"],
+            ),
             (("简历", "附件"), MessageType.RESUME_REQUEST, RiskLevel.LOW, []),
-            (("经验", "做过", "熟悉"), MessageType.EXPERIENCE_QUESTION, RiskLevel.LOW, ["employment", "project", "skill"]),
+            (
+                ("经验", "做过", "熟悉"),
+                MessageType.EXPERIENCE_QUESTION,
+                RiskLevel.LOW,
+                ["employment", "project", "skill"],
+            ),
             (("你好", "您好"), MessageType.GREETING, RiskLevel.LOW, []),
         ]
         selected = (MessageType.UNKNOWN, RiskLevel.MEDIUM, [])

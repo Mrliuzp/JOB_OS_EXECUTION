@@ -11,7 +11,9 @@ from jobos.core.errors import NotFoundError
 from jobos.infrastructure.repositories import JobRepository
 from jobos.services.job_service import JobService
 
-router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1/jobs", tags=["jobs"], dependencies=[Depends(require_local_request)]
+)
 
 
 class ImportTextRequest(BaseModel):
@@ -33,7 +35,9 @@ class ImportURLRequest(BaseModel):
 
 
 @router.get("")
-def list_jobs(status: str | None = None, session: Session = Depends(get_session)) -> list[dict[str, Any]]:
+def list_jobs(
+    status: str | None = None, session: Session = Depends(get_session)
+) -> list[dict[str, Any]]:
     """查询职位列表。"""
     return [_job_dict(item) for item in JobRepository(session).list(status)]
 

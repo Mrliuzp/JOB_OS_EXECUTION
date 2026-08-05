@@ -133,7 +133,9 @@ def test_registry_and_orchestrator(factory: sessionmaker[Session]) -> None:
 
     queue = TaskQueue(factory)
     queue.enqueue("TEST", "entity", "1", "test:1", {"value": 2})
-    orchestrator = WorkflowOrchestrator(queue, {"TEST": lambda payload: {"result": int(payload["value"]) * 2}})
+    orchestrator = WorkflowOrchestrator(
+        queue, {"TEST": lambda payload: {"result": int(payload["value"]) * 2}}
+    )
     scheduler = WorkerScheduler(orchestrator, "worker", poll_interval_seconds=0)
     assert scheduler.run_once() is True
     assert scheduler.run_once() is False

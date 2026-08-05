@@ -17,7 +17,11 @@ class PageSnapshotStore:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def save(
-        self, trace_id: str, html: str, context: dict[str, Any], accessibility: dict[str, Any] | None = None
+        self,
+        trace_id: str,
+        html: str,
+        context: dict[str, Any],
+        accessibility: dict[str, Any] | None = None,
     ) -> Path:
         """创建单次调试目录。"""
         directory = self.root / trace_id

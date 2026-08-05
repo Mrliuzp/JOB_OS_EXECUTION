@@ -13,7 +13,9 @@ from jobos.prompts.registry import PromptRegistry
 from jobos.providers.skeleton import SkeletonProvider
 
 
-def test_chrome_detection_and_environment_secret(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_chrome_detection_and_environment_secret(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     chrome = tmp_path / "chrome.exe"
     chrome.write_text("", encoding="utf-8")
     assert detect_chrome_path(chrome) == chrome

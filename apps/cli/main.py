@@ -97,7 +97,13 @@ def doctor() -> None:
         checks.append(("配置", False, str(exc)))
         settings = None
     checks.append(("Python", sys.version_info >= (3, 11), platform.python_version()))
-    checks.append(("规格文件", (ROOT / "docs/AI_JOB_OS_EXECUTION_SPEC.md").is_file(), "docs/AI_JOB_OS_EXECUTION_SPEC.md"))
+    checks.append(
+        (
+            "规格文件",
+            (ROOT / "docs/AI_JOB_OS_EXECUTION_SPEC.md").is_file(),
+            "docs/AI_JOB_OS_EXECUTION_SPEC.md",
+        )
+    )
     try:
         init_database(get_engine())
         checks.append(("数据库", True, "连接成功"))
@@ -111,7 +117,13 @@ def doctor() -> None:
     checks.append(("Chrome", bool(chrome), chrome or "未配置；浏览器任务不可用"))
     llm_ok = bool(settings and settings.llm.providers)
     checks.append(("LLM", llm_ok, "已配置" if llm_ok else "未配置；语义任务不可用"))
-    checks.append(("Provider", len(get_provider_registry().list()) > 0, ", ".join(item.name for item in get_provider_registry().list())))
+    checks.append(
+        (
+            "Provider",
+            len(get_provider_registry().list()) > 0,
+            ", ".join(item.name for item in get_provider_registry().list()),
+        )
+    )
     table = Table(title="JobOS-CN 环境诊断")
     table.add_column("检查项")
     table.add_column("状态")
@@ -164,14 +176,18 @@ def provider_add(provider: str, name: str = "primary") -> None:
 @provider_app.command("login")
 def provider_login(provider: str) -> None:
     """提示用户在独立 Chrome Profile 中手动登录。"""
-    console.print(f"请运行 Dashboard 的 Provider 登录功能，手动完成 {provider} 登录；系统不会保存密码或绕过验证码。")
+    console.print(
+        f"请运行 Dashboard 的 Provider 登录功能，手动完成 {provider} 登录；系统不会保存密码或绕过验证码。"
+    )
 
 
 @provider_app.command("check")
 def provider_check(provider: str) -> None:
     """显示平台账号记录状态。"""
     with get_session_factory()() as session:
-        account = session.scalar(select(PlatformAccountORM).where(PlatformAccountORM.provider == provider))
+        account = session.scalar(
+            select(PlatformAccountORM).where(PlatformAccountORM.provider == provider)
+        )
         console.print(account.status if account else "尚未创建平台账号")
 
 
@@ -181,6 +197,7 @@ def discover(
     keyword: list[str] = typer.Option([], "--keyword", "-k", help="可重复填写的关键词。"),
 ) -> None:
     """发现并补全职位。"""
+
     async def execute() -> tuple[int, int]:
         with get_session_factory()() as session, session.begin():
             account = session.scalar(
@@ -188,7 +205,9 @@ def discover(
             )
             if account is None:
                 account = PlatformAccountORM(
-                    provider=provider, display_name="primary", status="logged_in" if provider == "mock" else "unknown"
+                    provider=provider,
+                    display_name="primary",
+                    status="logged_in" if provider == "mock" else "unknown",
                 )
                 session.add(account)
                 session.flush()
@@ -205,6 +224,7 @@ def discover(
 @app.command("sync-messages")
 def sync_messages(provider: str = typer.Option("mock", help="Provider 名称。")) -> None:
     """同步平台会话和消息。"""
+
     async def execute() -> tuple[int, int]:
         with get_session_factory()() as session, session.begin():
             account = session.scalar(
@@ -225,13 +245,16 @@ def sync_messages(provider: str = typer.Option("mock", help="Provider 名称。"
 def job_import_text(path: Path, title: str, company: str) -> None:
     """从 UTF-8 文本文件导入 JD。"""
     with get_session_factory()() as session, session.begin():
-        job, created = JobService(session).import_text(title, company, path.read_text(encoding="utf-8"))
+        job, created = JobService(session).import_text(
+            title, company, path.read_text(encoding="utf-8")
+        )
         console.print(f"职位 {job.id}，{'新建' if created else '已更新'}")
 
 
 @job_app.command("score")
 def job_score(job_id: str) -> None:
     """使用规则和事实证据评分。"""
+
     async def execute() -> float:
         with get_session_factory()() as session, session.begin():
             job = session.get(JobORM, job_id)
@@ -254,7 +277,9 @@ def job_score(job_id: str) -> None:
 
 
 @application_app.command("create")
-def application_create(job_id: str, profile_id: str, level: AutomationLevel = AutomationLevel.L1) -> None:
+def application_create(
+    job_id: str, profile_id: str, level: AutomationLevel = AutomationLevel.L1
+) -> None:
     """创建职位申请。"""
     with get_session_factory()() as session, session.begin():
         item = ApplicationService(session).create(job_id, profile_id, None, level)
@@ -265,22 +290,27 @@ def application_create(job_id: str, profile_id: str, level: AutomationLevel = Au
 def application_prepare(application_id: str, resume_id: str, message: str) -> None:
     """准备简历和开场语并创建审批。"""
     with get_session_factory()() as session, session.begin():
-        approval = ApplicationService(session).prepare_materials(
-            application_id, resume_id, message
-        )
+        approval = ApplicationService(session).prepare_materials(application_id, resume_id, message)
         console.print(approval.id if approval else "已按策略自动批准")
 
 
 @application_app.command("submit")
-def application_submit(application_id: str, live: bool = typer.Option(False, help="显式启用真实动作。")) -> None:
+def application_submit(
+    application_id: str, live: bool = typer.Option(False, help="显式启用真实动作。")
+) -> None:
     """提交申请；默认 Dry Run。"""
+
     async def execute() -> str:
         with get_session_factory()() as session, session.begin():
             application = session.get(ApplicationORM, application_id)
             if application is None:
                 raise typer.BadParameter("申请不存在")
             job = session.get(JobORM, application.job_id)
-            account = session.get(PlatformAccountORM, application.platform_account_id) if application.platform_account_id else None
+            account = (
+                session.get(PlatformAccountORM, application.platform_account_id)
+                if application.platform_account_id
+                else None
+            )
             if job is None or account is None:
                 raise typer.BadParameter("申请缺少职位或平台账号")
             result = await ApplicationService(session).submit(
@@ -307,7 +337,9 @@ def application_mark_submitted(application_id: str, external_id: str | None = No
 def approvals_list() -> None:
     """列出待审批项。"""
     with get_session_factory()() as session:
-        items = session.scalars(select(ApprovalRequestORM).where(ApprovalRequestORM.status == "pending")).all()
+        items = session.scalars(
+            select(ApprovalRequestORM).where(ApprovalRequestORM.status == "pending")
+        ).all()
         for item in items:
             console.print(f"{item.id} {item.approval_type} {item.reason}")
 
@@ -335,7 +367,14 @@ def status() -> None:
         counts = {
             "职位": int(session.scalar(select(func.count(JobORM.id))) or 0),
             "申请": int(session.scalar(select(func.count(ApplicationORM.id))) or 0),
-            "待审批": int(session.scalar(select(func.count(ApprovalRequestORM.id)).where(ApprovalRequestORM.status == "pending")) or 0),
+            "待审批": int(
+                session.scalar(
+                    select(func.count(ApprovalRequestORM.id)).where(
+                        ApprovalRequestORM.status == "pending"
+                    )
+                )
+                or 0
+            ),
         }
     for key, value in counts.items():
         console.print(f"{key}: {value}")
@@ -348,7 +387,9 @@ def dashboard() -> None:
 
 
 @app.command()
-def run(dry_run: bool = typer.Option(True, "--dry-run/--live", help="默认只执行 Dry Run。")) -> None:
+def run(
+    dry_run: bool = typer.Option(True, "--dry-run/--live", help="默认只执行 Dry Run。"),
+) -> None:
     """执行一次安全工作流入口。"""
     mode = "Dry Run" if dry_run else "真实动作模式"
     console.print(f"当前模式：{mode}。发现、评分和材料任务由 Worker 队列执行。")

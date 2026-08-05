@@ -31,7 +31,9 @@ class ProfileRepository:
         return profile
 
     def first(self) -> CandidateProfileORM | None:
-        return self.session.scalar(select(CandidateProfileORM).order_by(CandidateProfileORM.created_at))
+        return self.session.scalar(
+            select(CandidateProfileORM).order_by(CandidateProfileORM.created_at)
+        )
 
     def save(self, profile: CandidateProfileORM) -> CandidateProfileORM:
         self.session.add(profile)

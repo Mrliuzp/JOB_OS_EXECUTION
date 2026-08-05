@@ -25,7 +25,9 @@ class BrowserSessionManager:
         self._processes: dict[str, subprocess.Popen[bytes]] = {}
         self._sessions: dict[str, BrowserSession] = {}
 
-    def acquire(self, account_id: str, provider: str, account_name: str, purpose: str) -> BrowserSession:
+    def acquire(
+        self, account_id: str, provider: str, account_name: str, purpose: str
+    ) -> BrowserSession:
         """启动一个独立浏览器会话。"""
         if not self.executable_path.exists():
             raise ProviderTemporaryError(f"Chrome 不存在：{self.executable_path}")

@@ -77,7 +77,10 @@ class GeminiProvider:
             raise LLMConfigurationError("Gemini 未配置 API Key")
         payload = {
             "contents": [
-                {"role": item.role if item.role != "assistant" else "model", "parts": [{"text": item.content}]}
+                {
+                    "role": item.role if item.role != "assistant" else "model",
+                    "parts": [{"text": item.content}],
+                }
                 for item in request.messages
             ],
             "generationConfig": {

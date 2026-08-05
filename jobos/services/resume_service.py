@@ -54,11 +54,31 @@ class ResumeValidator:
         claims: list[ResumeBullet] = []
         for experience in [*document.experiences, *document.education]:
             claims.extend(experience.bullets)
-            metadata_sources = [allowed.get(item) for bullet in experience.bullets for item in bullet.source_fact_ids]
-            allowed_companies = {str(item.metadata.get("company")) for item in metadata_sources if item and item.metadata.get("company")}
-            allowed_roles = {str(item.metadata.get("role")) for item in metadata_sources if item and item.metadata.get("role")}
-            allowed_periods = {str(item.metadata.get("period")) for item in metadata_sources if item and item.metadata.get("period")}
-            if experience.company and allowed_companies and experience.company not in allowed_companies:
+            metadata_sources = [
+                allowed.get(item)
+                for bullet in experience.bullets
+                for item in bullet.source_fact_ids
+            ]
+            allowed_companies = {
+                str(item.metadata.get("company"))
+                for item in metadata_sources
+                if item and item.metadata.get("company")
+            }
+            allowed_roles = {
+                str(item.metadata.get("role"))
+                for item in metadata_sources
+                if item and item.metadata.get("role")
+            }
+            allowed_periods = {
+                str(item.metadata.get("period"))
+                for item in metadata_sources
+                if item and item.metadata.get("period")
+            }
+            if (
+                experience.company
+                and allowed_companies
+                and experience.company not in allowed_companies
+            ):
                 errors.append(f"公司名称缺少事实依据：{experience.company}")
             if experience.role and allowed_roles and experience.role not in allowed_roles:
                 errors.append(f"职位名称缺少事实依据：{experience.role}")
@@ -154,7 +174,18 @@ class ResumeService:
 
 
 def _skill_tokens(statement: str, metadata: dict[str, Any]) -> list[str]:
-    known = ["Vue", "Vue 3", "C#", ".NET", "Python", "FastAPI", "SQL", "Docker", "TypeScript", "Redis"]
+    known = [
+        "Vue",
+        "Vue 3",
+        "C#",
+        ".NET",
+        "Python",
+        "FastAPI",
+        "SQL",
+        "Docker",
+        "TypeScript",
+        "Redis",
+    ]
     metadata_skills = metadata.get("skills", [])
     result = [str(item) for item in metadata_skills] if isinstance(metadata_skills, list) else []
     lower = statement.lower()

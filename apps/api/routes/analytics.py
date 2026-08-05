@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from apps.api.dependencies import get_session, require_local_request
 from jobos.services.analytics_service import AnalyticsService
 
-router = APIRouter(prefix="/api/v1/analytics", tags=["analytics"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1/analytics", tags=["analytics"], dependencies=[Depends(require_local_request)]
+)
 
 
 @router.get("/summary")

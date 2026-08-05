@@ -25,7 +25,11 @@ class ProfileService:
         self, payload: CandidateProfileInput, profile_id: str | None = None
     ) -> CandidateProfileORM:
         """创建或更新单个候选人资料。"""
-        profile = self.session.get(CandidateProfileORM, profile_id) if profile_id else self.profiles.first()
+        profile = (
+            self.session.get(CandidateProfileORM, profile_id)
+            if profile_id
+            else self.profiles.first()
+        )
         if profile is None:
             profile = CandidateProfileORM()
         for key, value in payload.model_dump().items():

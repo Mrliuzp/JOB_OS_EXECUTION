@@ -17,7 +17,9 @@ from jobos.core.errors import ConfigurationError, JobOSError
 from jobos.infrastructure.db.models import PlatformAccountORM
 from jobos.providers.registry import ProviderRegistry
 
-router = APIRouter(prefix="/api/v1/providers", tags=["providers"], dependencies=[Depends(require_local_request)])
+router = APIRouter(
+    prefix="/api/v1/providers", tags=["providers"], dependencies=[Depends(require_local_request)]
+)
 
 
 class CreateAccountRequest(BaseModel):
@@ -34,8 +36,7 @@ def list_providers(
 ) -> list[dict[str, Any]]:
     """列出 Provider 及能力。"""
     return [
-        {"name": item.name, "capabilities": item.capabilities.__dict__}
-        for item in registry.list()
+        {"name": item.name, "capabilities": item.capabilities.__dict__} for item in registry.list()
     ]
 
 
