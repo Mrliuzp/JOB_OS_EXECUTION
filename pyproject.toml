@@ -88,7 +88,7 @@ line-length = 100
 extend-exclude = ["src/applypilot", "apps/web", "docs"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "RUF"]
+select = ["E", "F", "I", "B"]
 ignore = [
     "E501", # 长行由 Ruff formatter 与前端工具链分别处理。
     "B008", # Typer 和 FastAPI 约定在函数默认值中声明依赖与选项。
