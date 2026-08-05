@@ -10,6 +10,14 @@ export default [
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
   {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
+  {
     files: ['**/*.{ts,vue}'],
     languageOptions: {
       globals: {
@@ -18,6 +26,7 @@ export default [
       },
     },
     rules: {
+      'prettier/prettier': 'off',
       'vue/multi-word-component-names': 'off',
     },
   },
