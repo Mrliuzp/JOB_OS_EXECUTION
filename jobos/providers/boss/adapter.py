@@ -7,6 +7,7 @@ from urllib.parse import quote_plus
 
 from jobos.browser.risk_detector import detect_browser_risk
 from jobos.core.errors import (
+    CapabilityNotSupported,
     ProviderCaptchaDetected,
     ProviderLoginRequired,
     ProviderTemporaryError,
@@ -65,7 +66,10 @@ class BossProvider:
         risk = detect_browser_risk(html)
         if risk.detected:
             return LoginStatus(logged_in=False, requires_manual_action=True)
-        logged_in = any(marker in html for marker in ('data-user-logged-in="true"', "退出登录", "个人中心"))
+        logged_in = any(
+            marker in html
+            for marker in ('data-user-logged-in="true"', "退出登录", "个人中心")
+        )
         if not logged_in:
             raise ProviderLoginRequired("BOSS 账号需要在独立 Chrome Profile 中手动登录")
         return LoginStatus(logged_in=True, account_name=account.display_name)
@@ -178,4 +182,9 @@ class BossProvider:
         if risk.detected:
             raise ProviderCaptchaDetected(f"BOSS 动作触发风控：{risk.marker}")
         self._completed_keys.add(idempotency_key)
-        return ProviderActionResult(success=True, dry_run=False, external_id=result, detail="平台动作完成")
+        return ProviderActionResult(
+            success=True,
+            dry_run=False,
+            external_id=result,
+            detail="平台动作完成",
+        )
