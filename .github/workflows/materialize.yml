@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   materialize:
+    if: github.event.head_commit.message != '实现：完成 WP-002 至 WP-024'
     runs-on: ubuntu-latest
     steps:
       - name: 检出功能分支
@@ -46,8 +47,8 @@ jobs:
             | base64 --decode > /tmp/jobos-payload.tar.xz
           xz --test /tmp/jobos-payload.tar.xz
           tar -xJf /tmp/jobos-payload.tar.xz -C .
+          git restore .github/workflows/ci.yml .github/workflows/materialize.yml
           rm -rf .jobos-bootstrap
-          rm -f .github/workflows/materialize.yml
 
       - name: 提交完整实现
         shell: bash
