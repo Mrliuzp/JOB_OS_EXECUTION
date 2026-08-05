@@ -28,11 +28,11 @@ def build_scheduler() -> WorkerScheduler:
     )
 
 
-def main() -> None:
-    """启动 Worker。"""
+def main(argv: list[str] | None = None) -> None:
+    """启动 Worker；测试可显式传入参数，避免读取测试进程参数。"""
     parser = argparse.ArgumentParser(description="JobOS-CN 后台任务 Worker")
     parser.add_argument("--once", action="store_true", help="只轮询一次后退出")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     scheduler = build_scheduler()
     print(
         json.dumps(
