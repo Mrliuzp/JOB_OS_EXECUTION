@@ -23,7 +23,27 @@ jobs:
         run: |
           set -euo pipefail
           test -f .jobos-bootstrap/008.part
-          cat .jobos-bootstrap/*.part | base64 --decode > /tmp/jobos-payload.tar.xz
+          cat \
+            .jobos-bootstrap/001.part \
+            .jobos-bootstrap/002.part \
+            .jobos-bootstrap/003.part \
+            .jobos-bootstrap/004.00.part \
+            .jobos-bootstrap/004.01.part \
+            .jobos-bootstrap/004.02.part \
+            .jobos-bootstrap/004.03.part \
+            .jobos-bootstrap/004.04.part \
+            .jobos-bootstrap/004.05.part \
+            .jobos-bootstrap/004.06.part \
+            .jobos-bootstrap/004.07.part \
+            .jobos-bootstrap/004.08.part \
+            .jobos-bootstrap/004.09.part \
+            .jobos-bootstrap/004.10.part \
+            .jobos-bootstrap/004.11.part \
+            .jobos-bootstrap/005.part \
+            .jobos-bootstrap/006.part \
+            .jobos-bootstrap/007.part \
+            .jobos-bootstrap/008.part \
+            | base64 --decode > /tmp/jobos-payload.tar.xz
           xz --test /tmp/jobos-payload.tar.xz
           tar -xJf /tmp/jobos-payload.tar.xz -C .
           rm -rf .jobos-bootstrap
