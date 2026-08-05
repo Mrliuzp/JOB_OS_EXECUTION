@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 
@@ -42,6 +45,26 @@ def worker_heartbeat_path(data_dir: Path) -> Path:
     return data_dir / "worker-heartbeat.json"
 
 
+def _replace_with_retry(
+    source: Path,
+    target: Path,
+    *,
+    attempts: int = 8,
+    initial_delay_seconds: float = 0.01,
+) -> None:
+    """在 Windows 短暂占用目标文件时重试原子替换。"""
+    delay_seconds = initial_delay_seconds
+    for attempt in range(attempts):
+        try:
+            os.replace(source, target)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(delay_seconds)
+            delay_seconds = min(delay_seconds * 2, 0.2)
+
+
 def write_worker_heartbeat(
     path: Path,
     worker_id: str,
@@ -49,7 +72,7 @@ def write_worker_heartbeat(
     *,
     now: datetime | None = None,
 ) -> None:
-    """原子写入 Worker 心跳。"""
+    """使用独立临时文件原子写入 Worker 心跳。"""
     observed_at = now or datetime.now(UTC)
     if observed_at.tzinfo is None:
         observed_at = observed_at.replace(tzinfo=UTC)
@@ -59,12 +82,27 @@ def write_worker_heartbeat(
         "last_seen_at": observed_at.astimezone(UTC).isoformat(),
     }
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary_path = path.with_suffix(path.suffix + ".tmp")
-    temporary_path.write_text(
-        json.dumps(payload, ensure_ascii=False, sort_keys=True),
-        encoding="utf-8",
-    )
-    temporary_path.replace(path)
+    temporary_path: Path | None = None
+    try:
+        with NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary_file:
+            temporary_file.write(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+            temporary_path = Path(temporary_file.name)
+        _replace_with_retry(temporary_path, path)
+    finally:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
 def read_worker_status(
