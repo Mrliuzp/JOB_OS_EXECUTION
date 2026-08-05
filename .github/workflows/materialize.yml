@@ -1,0 +1,40 @@
+name: 临时展开完整实现
+
+on:
+  push:
+    branches:
+      - feat/wp-002-024-complete
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出功能分支
+        uses: actions/checkout@v4
+        with:
+          ref: feat/wp-002-024-complete
+          fetch-depth: 0
+
+      - name: 校验并展开实现文件
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .jobos-bootstrap/008.part
+          cat .jobos-bootstrap/*.part | base64 --decode > /tmp/jobos-payload.tar.xz
+          xz --test /tmp/jobos-payload.tar.xz
+          tar -xJf /tmp/jobos-payload.tar.xz -C .
+          rm -rf .jobos-bootstrap
+          rm -f .github/workflows/materialize.yml
+
+      - name: 提交完整实现
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Mrliuzp"
+          git config user.email "44855363+Mrliuzp@users.noreply.github.com"
+          git add -A
+          git commit -m "实现：完成 WP-002 至 WP-024"
+          git push origin HEAD:feat/wp-002-024-complete
