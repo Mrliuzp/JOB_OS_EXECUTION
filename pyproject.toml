@@ -78,6 +78,7 @@ line-length = 100
 extend-exclude = [
     "src/applypilot",
     "apps/web",
+    "docs",
 ]
 
 [tool.ruff.lint]
