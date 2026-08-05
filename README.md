@@ -32,7 +32,7 @@ JobOS-CN 是一个本地优先、面向国内兼职、远程岗位和外包项�
 前置环境：
 
 - Python 3.11 或更高版本。
-- Node.js 22.12.0 或更高版本。
+- Node.js 22.13.0 或更高版本。
 - 本机 Chrome，用于需要人工登录的招聘平台流程。
 
 先确认版本：
@@ -42,7 +42,7 @@ py --version
 node --version
 ```
 
-项目根目录的 `.nvmrc` 固定为 Node.js 22.12.0。使用版本管理器时，请切换到该版本后再安装依赖。
+项目根目录的 `.nvmrc` 固定为 Node.js 22.13.0。使用版本管理器时，请切换到该版本后再安装依赖。
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
