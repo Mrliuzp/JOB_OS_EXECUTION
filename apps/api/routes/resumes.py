@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from jobos.artifacts.renderer import ResumeRenderer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from apps.api.dependencies import get_session, get_settings, require_local_request
+from jobos.artifacts.renderer import ResumeRenderer
 from jobos.core.config import JobOSSettings
 from jobos.infrastructure.db.models import (
     CandidateProfileORM,
