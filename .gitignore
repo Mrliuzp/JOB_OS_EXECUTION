@@ -1,31 +1,50 @@
-# User data (NEVER commit)
-profile.json
-resume.txt
-resume.pdf
-*.env
+# Environment and secrets
+.env
 .env.*
 !.env.example
-
-# Runtime artifacts
-*.db
-tailored_resumes/
-cover_letters/
-chrome-workers/
-apply-workers/
-apply_logs/
-logs/
-
-# MCP configs (per-machine)
-.mcp*.json
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
 dist/
 build/
-*.egg
+
+# Node
+node_modules/
+apps/web/node_modules/
+apps/web/dist/
+apps/web/coverage/
+
+# Runtime data
+*.db
+*.sqlite
+*.sqlite3
+data/
+logs/
+artifacts/
+browser-profiles/
+chrome-workers/
+apply-workers/
+*.log
+
+# Personal files
+profile.json
+resume.txt
+resume.pdf
+
+# MCP and local agent configuration
+.mcp*.json
+.claude/
 
 # IDE
 .vscode/
@@ -36,6 +55,3 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-
-# Claude Code
-.claude/

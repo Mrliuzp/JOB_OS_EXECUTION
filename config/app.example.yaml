@@ -1,0 +1,5 @@
+app:
+  name: JobOS-CN
+  environment: development
+  timezone: Asia/Shanghai
+  language: zh-CN
