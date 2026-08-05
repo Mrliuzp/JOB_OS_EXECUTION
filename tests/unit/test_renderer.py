@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+
 from jobos.artifacts.renderer import ResumeRenderer
 
 
