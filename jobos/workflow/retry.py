@@ -15,4 +15,6 @@ class RetryPolicy:
         """计算第 N 次失败后的等待时间。"""
         if attempt_count < 1:
             return 0
-        return min(self.base_seconds * (2 ** (attempt_count - 1)), self.max_seconds)
+        exponent = attempt_count - 1
+        delay = self.base_seconds * (1 << exponent)
+        return min(delay, self.max_seconds)
