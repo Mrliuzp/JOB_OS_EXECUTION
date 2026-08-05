@@ -85,7 +85,7 @@ def _role_text(nodes: list[dict[str, object]], role: str) -> str | None:
         (node for node in nodes if _attrs(node).get("data-role") == role),
         None,
     )
-    return _text(target) if target else None
+    return _text(target) if target is not None else None
 
 
 def parse_search_page(html: str, base_url: str = "https://www.zhipin.com") -> JobSearchPage:
