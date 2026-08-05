@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import and_, or_, select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -84,24 +85,27 @@ class TaskQueue:
             )
             if candidate_id is None:
                 return None
-            result = session.execute(
-                update(WorkflowTaskORM)
-                .where(
-                    WorkflowTaskORM.id == candidate_id,
-                    WorkflowTaskORM.status.in_(
-                        [TaskStatus.PENDING.value, TaskStatus.RETRY_WAIT.value]
-                    ),
-                    or_(
-                        WorkflowTaskORM.lease_expires_at.is_(None),
-                        WorkflowTaskORM.lease_expires_at <= current,
-                    ),
-                )
-                .values(
-                    status=TaskStatus.LEASED.value,
-                    lease_owner=worker_id,
-                    lease_expires_at=expires,
-                    attempt_count=WorkflowTaskORM.attempt_count + 1,
-                )
+            result = cast(
+                CursorResult[Any],
+                session.execute(
+                    update(WorkflowTaskORM)
+                    .where(
+                        WorkflowTaskORM.id == candidate_id,
+                        WorkflowTaskORM.status.in_(
+                            [TaskStatus.PENDING.value, TaskStatus.RETRY_WAIT.value]
+                        ),
+                        or_(
+                            WorkflowTaskORM.lease_expires_at.is_(None),
+                            WorkflowTaskORM.lease_expires_at <= current,
+                        ),
+                    )
+                    .values(
+                        status=TaskStatus.LEASED.value,
+                        lease_owner=worker_id,
+                        lease_expires_at=expires,
+                        attempt_count=WorkflowTaskORM.attempt_count + 1,
+                    )
+                ),
             )
             if result.rowcount != 1:
                 return None
@@ -159,19 +163,24 @@ class TaskQueue:
         """回收 Worker 崩溃后留下的过期租约。"""
         current = now or utc_now()
         with self.factory() as session, session.begin():
-            result = session.execute(
-                update(WorkflowTaskORM)
-                .where(
-                    WorkflowTaskORM.status.in_([TaskStatus.LEASED.value, TaskStatus.RUNNING.value]),
-                    WorkflowTaskORM.lease_expires_at.is_not(None),
-                    WorkflowTaskORM.lease_expires_at <= current,
-                )
-                .values(
-                    status=TaskStatus.RETRY_WAIT.value,
-                    lease_owner=None,
-                    lease_expires_at=None,
-                    available_at=current,
-                )
+            result = cast(
+                CursorResult[Any],
+                session.execute(
+                    update(WorkflowTaskORM)
+                    .where(
+                        WorkflowTaskORM.status.in_(
+                            [TaskStatus.LEASED.value, TaskStatus.RUNNING.value]
+                        ),
+                        WorkflowTaskORM.lease_expires_at.is_not(None),
+                        WorkflowTaskORM.lease_expires_at <= current,
+                    )
+                    .values(
+                        status=TaskStatus.RETRY_WAIT.value,
+                        lease_owner=None,
+                        lease_expires_at=None,
+                        available_at=current,
+                    )
+                ),
             )
             return int(result.rowcount or 0)
 
