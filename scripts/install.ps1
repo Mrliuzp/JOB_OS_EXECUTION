@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 if (-not (Get-Command py -ErrorAction SilentlyContinue)) {
     throw "未找到 Python 启动器，请先安装 Python 3.11 或更高版本。"
@@ -26,7 +26,7 @@ py -3.11 -m venv .venv
 
 Push-Location apps\web
 try {
-    npm ci
+    & npm.cmd ci
 } finally {
     Pop-Location
 }
