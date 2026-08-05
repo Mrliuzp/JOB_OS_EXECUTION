@@ -136,7 +136,11 @@ class CommunicationService:
             ),
             (("你好", "您好"), MessageType.GREETING, RiskLevel.LOW, []),
         ]
-        selected = (MessageType.UNKNOWN, RiskLevel.MEDIUM, [])
+        selected: tuple[MessageType, RiskLevel, list[str]] = (
+            MessageType.UNKNOWN,
+            RiskLevel.MEDIUM,
+            [],
+        )
         for markers, message_type, risk, fact_types in mapping:
             if any(marker in text for marker in markers):
                 selected = (message_type, risk, fact_types)
