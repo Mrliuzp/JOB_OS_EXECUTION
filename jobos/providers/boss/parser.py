@@ -205,12 +205,13 @@ def parse_job_detail(html: str, canonical_url: str) -> RawJobDetail:
     ]
     work_mode = str(root_attrs.get("data-work-mode") or "unknown")
     employment_type = str(root_attrs.get("data-employment-type") or "unknown")
+    location_node = by_role("location")
     return RawJobDetail(
         external_job_id=external_id,
         canonical_url=canonical_url,
         title=_text(title_node),
         company_name=_text(company_node),
-        location=_text(by_role("location")) if by_role("location") else None,
+        location=_text(location_node) if location_node is not None else None,
         description=_text(description_node),
         requirements=requirements,
         benefits=benefits,
