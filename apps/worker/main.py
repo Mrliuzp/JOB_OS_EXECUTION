@@ -11,6 +11,7 @@ from apps.api.dependencies import get_session_factory, get_settings
 from apps.worker.scheduler import WorkerScheduler
 from jobos.workflow.orchestrator import WorkflowOrchestrator
 from jobos.workflow.task_queue import TaskQueue
+from jobos.workflow.worker_status import worker_heartbeat_path
 
 
 def build_scheduler() -> WorkerScheduler:
@@ -19,7 +20,12 @@ def build_scheduler() -> WorkerScheduler:
     worker_id = f"{socket.gethostname()}-{uuid4().hex[:8]}"
     queue = TaskQueue(get_session_factory(), settings.worker.lease_seconds)
     orchestrator = WorkflowOrchestrator(queue=queue, handlers={})
-    return WorkerScheduler(orchestrator, worker_id)
+    return WorkerScheduler(
+        orchestrator,
+        worker_id,
+        heartbeat_path=worker_heartbeat_path(settings.resolved_data_dir()),
+        heartbeat_interval_seconds=float(settings.worker.heartbeat_seconds),
+    )
 
 
 def main() -> None:
