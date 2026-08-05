@@ -8,6 +8,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from apps.api.dependencies import get_settings
 from apps.api.routes import (
     analytics,
     applications,
@@ -18,6 +19,7 @@ from apps.api.routes import (
     resumes,
     workflow,
 )
+from jobos.workflow.worker_status import read_worker_status, worker_heartbeat_path
 
 
 class HealthResponse(BaseModel):
@@ -57,11 +59,15 @@ def create_app() -> FastAPI:
 
     @application.websocket("/api/v1/ws/worker-status")
     async def worker_status(websocket: WebSocket) -> None:
-        """发送 Worker 心跳状态。"""
+        """发送 Worker 真实心跳状态。"""
         await websocket.accept()
+        settings = get_settings()
+        heartbeat_path = worker_heartbeat_path(settings.resolved_data_dir())
+        stale_after_seconds = float(settings.worker.heartbeat_seconds * 3)
         try:
             while True:
-                await websocket.send_json({"worker": "unknown", "status": "waiting"})
+                status = read_worker_status(heartbeat_path, stale_after_seconds)
+                await websocket.send_json(status.websocket_payload())
                 await asyncio.sleep(5)
         except WebSocketDisconnect:
             return
