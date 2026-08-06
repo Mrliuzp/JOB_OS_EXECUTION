@@ -1,9 +1,10 @@
 """职位评分与简历 API。"""
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -110,6 +111,33 @@ async def render_resume(
     version.rendered_pdf_path = str(pdf)
     session.flush()
     return {"html": str(html), "pdf": str(pdf)}
+
+
+@router.get("/resumes/{resume_id}/download/{artifact_type}")
+def download_resume(
+    resume_id: str,
+    artifact_type: Literal["html", "pdf"],
+    session: Session = Depends(get_session),
+    settings: JobOSSettings = Depends(get_settings),
+) -> FileResponse:
+    """下载已渲染的 HTML 或 PDF 简历文件。"""
+    version = session.get(ResumeVersionORM, resume_id)
+    if version is None:
+        raise HTTPException(status_code=404, detail="简历不存在")
+
+    artifact_path = (
+        settings.resolved_data_dir()
+        / "artifacts"
+        / "resumes"
+        / version.id
+        / f"resume.{artifact_type}"
+    )
+    if not artifact_path.is_file():
+        raise HTTPException(status_code=409, detail="简历尚未渲染，请先生成文件")
+
+    media_type = "application/pdf" if artifact_type == "pdf" else "text/html; charset=utf-8"
+    filename = f"resume-{version.id}.{artifact_type}"
+    return FileResponse(path=artifact_path, media_type=media_type, filename=filename)
 
 
 def _orm_dict(item: Any) -> dict[str, Any]:
