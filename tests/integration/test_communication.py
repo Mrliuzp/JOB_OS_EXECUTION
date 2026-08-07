@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from jobos.domain.schemas import CandidateFactInput, CandidateProfileInput
-from jobos.infrastructure.db.models import MessageORM, PlatformAccountORM
+from jobos.infrastructure.db.models import ConversationORM, MessageORM, PlatformAccountORM
 from jobos.memory.local_store import LocalMemoryStore
 from jobos.providers.mock import MockProvider
 from jobos.rules.engine import RuleEngine
@@ -73,3 +73,49 @@ def test_salary_offer_and_contract_require_human(session: Session) -> None:
         )
         result = service.classify(message)
         assert result.requires_human is True
+
+
+
+def test_availability_reply_rejects_irrelevant_fact_types(session: Session) -> None:
+    """????????????????"""
+    profile_service = ProfileService(session)
+    profile = profile_service.upsert_profile(
+        CandidateProfileInput(name="????????")
+    )
+    project_fact = profile_service.add_fact(
+        profile.id,
+        CandidateFactInput(
+            fact_type="project",
+            statement="??????2000????????2???",
+        ),
+    )
+
+    conversation = ConversationORM(
+        provider="mock",
+        external_conversation_id="fact-filter-conversation",
+    )
+    session.add(conversation)
+    session.flush()
+
+    message = MessageORM(
+        conversation_id=conversation.id,
+        external_message_id="fact-filter-message",
+        direction="inbound",
+        sender_type="recruiter",
+        content="???????????",
+    )
+    session.add(message)
+    session.flush()
+
+    service = CommunicationService(session, RuleEngine(POLICIES))
+    draft, approval = service.generate_reply(
+        message,
+        profile.id,
+        LocalMemoryStore(session),
+    )
+
+    assert project_fact.id not in draft.evidence_ids
+    assert draft.reply == "???????????????"
+    assert draft.requires_human is True
+    assert approval is not None
+    assert message.reply_status == "awaiting_approval"

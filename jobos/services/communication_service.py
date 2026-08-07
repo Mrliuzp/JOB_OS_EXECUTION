@@ -173,6 +173,12 @@ class CommunicationService:
         """仅使用允许聊天的事实生成回复。"""
         classification = self.classify(message)
         facts = memory.search(profile_id, message.content, for_chat=True, limit=8)
+        if classification.required_fact_types:
+            facts = [
+                fact
+                for fact in facts
+                if fact.fact_type in classification.required_fact_types
+            ]
         if classification.message_type == MessageType.RESUME_REQUEST.value:
             reply = "可以，我会通过平台发送与该职位匹配的简历，请查收。"
             evidence_ids: list[str] = []
