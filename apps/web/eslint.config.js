@@ -9,6 +9,15 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
+  prettier,
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
   {
     files: ['**/*.{ts,vue}'],
     languageOptions: {
@@ -18,8 +27,9 @@ export default [
       },
     },
     rules: {
+      'prettier/prettier': 'off',
+      'vue/first-attribute-linebreak': 'off',
       'vue/multi-word-component-names': 'off',
     },
   },
-  prettier,
 ]

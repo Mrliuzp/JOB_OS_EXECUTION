@@ -1,1 +1,1 @@
-"""Command-line application package."""
+"""命令行应用。"""

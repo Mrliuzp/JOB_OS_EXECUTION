@@ -1,2 +1,24 @@
+version: 1
+job_policy:
+  accepted_employment_types: [part_time, contract, freelance, temporary]
+  accepted_work_modes: [remote, hybrid]
+  preferred_keywords: [Vue, Vue 3, C#, .NET, Python, FastAPI, 软件架构, 系统设计, 技术顾问]
+  rejected_keywords: [驻场全职, 纯销售, 培训招生, 无薪, 拉新, 刷单]
+  blocked_companies: []
+  blocked_company_patterns: [培训, 人力外包转包]
+  score_thresholds:
+    reject_below: 55
+    review_below: 72
+    auto_contact_above: 82
 automation:
   level: L1
+  daily_contact_limit: 15
+  daily_application_limit: 8
+  minimum_seconds_between_actions: 20
+  allow_auto_greeting: true
+  allow_auto_resume_send: false
+message_policy:
+  auto_reply_types: [greeting, resume_request, availability, experience_question]
+  manual_review_types: [salary, interview_schedule, technical_question, personal_information]
+  always_manual_types: [offer, contract]
+  forbidden_auto_content: [身份证, 银行卡, 当前公司内部数据, 客户保密信息, 法律承诺]

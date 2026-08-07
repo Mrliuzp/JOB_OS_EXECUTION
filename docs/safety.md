@@ -1,3 +1,17 @@
-# Safety
+# 安全与隐私
 
-JobOS-CN must not bypass CAPTCHA, authentication, platform risk controls or human approvals. Secrets, cookies, personal resumes and browser profiles must never be committed to Git.
+## 数据保护
+
+- API Key 使用环境变量或系统凭据管理器。
+- 浏览器 Profile、数据库、日志、简历和调试快照均在 `.gitignore` 中。
+- 日志自动脱敏手机号、邮箱、身份证、Cookie、Token 和密码字段。
+- `restricted` 事实不得进入普通简历或聊天 Prompt。
+- 页面调试包保存前执行脱敏。
+
+## 自动化安全
+
+- 默认自动化等级为 L1。
+- 默认 `dry_run=true`。
+- 薪资、Offer、合同、面试时间、身份信息和法律承诺必须人工处理。
+- 真实平台动作需要用户本人登录和明确授权。
+- 系统不会绕过 CAPTCHA、登录验证、风控或平台限制。

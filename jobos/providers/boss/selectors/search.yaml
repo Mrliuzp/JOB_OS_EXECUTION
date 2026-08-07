@@ -1,0 +1,8 @@
+key: search.job_cards
+strategies:
+  - type: role
+    role: listitem
+  - type: css
+    value: .job-card-wrapper
+validation:
+  minimum_count: 1

@@ -1,0 +1,8 @@
+key: job_detail.description
+strategies:
+  - type: css
+    value: '[data-role="description"]'
+  - type: css
+    value: .job-sec-text
+validation:
+  minimum_count: 1

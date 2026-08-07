@@ -1,0 +1,2 @@
+[console_scripts]
+jobos = apps.cli.main:app

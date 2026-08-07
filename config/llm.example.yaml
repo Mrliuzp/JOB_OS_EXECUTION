@@ -1,0 +1,12 @@
+llm:
+  default_provider: openai
+  providers:
+    openai:
+      base_url: ${OPENAI_BASE_URL}
+      api_key: ${OPENAI_API_KEY}
+    gemini:
+      api_key: ${GEMINI_API_KEY}
+    local:
+      base_url: ${LLM_URL}
+      api_key: ${LLM_API_KEY}
+  tasks: {}

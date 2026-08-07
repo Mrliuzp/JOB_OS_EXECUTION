@@ -1,1 +1,1 @@
-"""Domain models and state machines."""
+"""领域模型。"""

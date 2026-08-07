@@ -1,3 +1,3 @@
-"""JobOS-CN core package."""
+"""JobOS-CN 核心包。"""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
